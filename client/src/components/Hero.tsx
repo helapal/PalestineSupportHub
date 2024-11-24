@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/button";
+import React from 'react'
 
-export function Hero() {
+export default function Hero() {
   return (
     <div className="relative h-[500px] flex items-center justify-center">
       <div 
         className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1637034318492-c5d36e4f6d99)',
+        style={{ 
+          backgroundImage: 'url("https://images.unsplash.com/photo-1637034318492-c5d36e4f6d99")',
           filter: 'brightness(0.6)'
         }}
       />
@@ -16,14 +16,13 @@ export function Hero() {
           Join us in making a difference through verified humanitarian campaigns.
           Every donation brings hope and support to those in need.
         </p>
-        <Button 
-          size="lg"
-          onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}
-          className="bg-olive-700 hover:bg-olive-800"
+        <a 
+          href="#campaigns"
+          className="inline-block px-6 py-3 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-lg transition-colors"
         >
           View Campaigns
-        </Button>
+        </a>
       </div>
     </div>
-  );
+  )
 }

@@ -1,57 +1,33 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { type Campaign } from "@db/schema";
-import { useNavigate } from "wouter";
+import React from 'react'
+import { Campaign } from '../lib/api'
 
 interface CampaignCardProps {
-  campaign: Campaign;
-  selected?: boolean;
-  onSelect?: () => void;
-  selectable?: boolean;
+  campaign: Campaign
 }
 
-export function CampaignCard({ campaign, selected, onSelect, selectable }: CampaignCardProps) {
-  const navigate = useNavigate();
-  const progress = (Number(campaign.current) / Number(campaign.goal)) * 100;
-
+export default function CampaignCard({ campaign }: CampaignCardProps) {
   return (
-    <Card className={`overflow-hidden transition-all ${selected ? 'ring-2 ring-primary' : ''}`}>
-      <CardHeader className="p-0">
-        <div
-          className="h-48 bg-cover bg-center"
-          style={{ backgroundImage: `url(${campaign.imageUrl})` }}
-        />
-      </CardHeader>
-      <CardContent className="p-4">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div 
+        className="h-48 bg-cover bg-center"
+        style={{ backgroundImage: `url(${campaign.image_url})` }}
+      />
+      <div className="p-4">
         <h3 className="text-xl font-bold mb-2">{campaign.title}</h3>
         <p className="text-gray-600 mb-4 line-clamp-2">{campaign.description}</p>
         <div className="space-y-2">
-          <Progress value={progress} className="h-2" />
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-olive-700 h-2 rounded-full"
+              style={{ width: `${(campaign.current / campaign.goal) * 100}%` }}
+            />
+          </div>
           <div className="flex justify-between text-sm">
-            <span>${Number(campaign.current).toLocaleString()}</span>
-            <span>Goal: ${Number(campaign.goal).toLocaleString()}</span>
+            <span>${campaign.current.toFixed(2)}</span>
+            <span>Goal: ${campaign.goal.toFixed(2)}</span>
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        {selectable ? (
-          <Button
-            onClick={onSelect}
-            variant={selected ? "default" : "outline"}
-            className="w-full"
-          >
-            {selected ? "Selected" : "Select Campaign"}
-          </Button>
-        ) : (
-          <Button 
-            onClick={() => navigate("/donate")} 
-            className="w-full"
-          >
-            Donate Now
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
-  );
+      </div>
+    </div>
+  )
 }

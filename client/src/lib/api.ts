@@ -1,17 +1,32 @@
-import { type Campaign, type InsertDonation } from "@db/schema";
+import axios from 'axios'
 
-export async function fetchCampaigns(): Promise<Campaign[]> {
-  const response = await fetch("/api/campaigns");
-  if (!response.ok) throw new Error("Failed to fetch campaigns");
-  return response.json();
+export interface Campaign {
+  id: number
+  title: string
+  description: string
+  image_url: string
+  goal: number
+  current: number
+  gofundme_url: string
+  created_at: string
+  updated_at: string
 }
 
-export async function submitDonation(donation: InsertDonation) {
-  const response = await fetch("/api/donations", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(donation),
-  });
-  if (!response.ok) throw new Error("Failed to submit donation");
-  return response.json();
+const api = axios.create({
+  baseURL: '/api'
+})
+
+export const getCampaigns = async (): Promise<Campaign[]> => {
+  const response = await api.get('/campaigns')
+  return response.data
+}
+
+export const makeDonation = async (data: {
+  email: string
+  amount: number
+  campaign_ids: string
+  recurring: number
+}) => {
+  const response = await api.post('/donate', data)
+  return response.data
 }

@@ -9,7 +9,7 @@ channel = "stable-24_05"
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
 publicDir = "dist"
-run = ["sh", "-c", "npm run build && node server/index.js"]
+run = ["sh", "-c", "npx tsup --config tsup.config.ts && node dist/server/index.js"]
 
 [[ports]]
 localPort = 5000
@@ -40,6 +40,10 @@ args = "Full Stack App"
 task = "workflow.run"
 args = "Development Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Laravel Server"
+
 [[workflows.workflow]]
 name = "Full Stack App"
 author = "agent"
@@ -52,7 +56,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run build && node server/index.js"
+args = "npx tsup --config tsup.config.ts && node dist/server/index.js"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -69,3 +73,18 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Laravel Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan serve --host=0.0.0.0 --port=8000"
+waitForPort = 8000
