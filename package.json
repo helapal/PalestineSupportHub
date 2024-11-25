@@ -9,7 +9,7 @@
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.7",
         "concurrently": "^9.1.0",
-        "laravel-vite-plugin": "^1.0",
+        "laravel-vite-plugin": "^1.0.6",
         "postcss": "^8.4.49",
         "tailwindcss": "^3.4.15",
         "vite": "^5.4.11"
@@ -32,6 +32,7 @@
         "@types/react-dom": "^18.3.1",
         "@types/ws": "^8.5.13",
         "@vitejs/plugin-react": "^4.3.3",
+        "alpinejs": "^3.14.3",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "dotenv": "^16.4.5",

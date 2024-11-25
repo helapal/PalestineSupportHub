@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "php-8.2"]
+modules = ["nodejs-20", "web", "php-8.2", "mysql"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
@@ -9,7 +9,7 @@ channel = "stable-24_05"
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
 publicDir = "dist"
-run = ["sh", "-c", "npx tsup --config tsup.config.ts && node dist/server/index.js"]
+run = ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=8000"]
 
 [[ports]]
 localPort = 5000
@@ -18,7 +18,6 @@ externalPort = 80
 [[ports]]
 localPort = 5173
 externalPort = 5173
-exposeLocalhost = true
 
 [[ports]]
 localPort = 8000
@@ -34,7 +33,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Full Stack App"
+args = "Laravel Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Laravel Server"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
@@ -42,37 +45,7 @@ args = "Development Server"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Laravel Server"
-
-[[workflows.workflow]]
-name = "Full Stack App"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npx tsup --config tsup.config.ts && node dist/server/index.js"
-waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Development Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
+args = "Database Setup"
 
 [[workflows.workflow]]
 name = "Laravel Server"
@@ -88,3 +61,49 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "php artisan serve --host=0.0.0.0 --port=8000"
 waitForPort = 8000
+
+[[workflows.workflow]]
+name = "Laravel Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan serve --host=0.0.0.0 --port=8000"
+waitForPort = 8000
+
+[[workflows.workflow]]
+name = "Development Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5173
+
+[[workflows.workflow]]
+name = "Database Setup"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
