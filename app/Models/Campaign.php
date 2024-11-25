@@ -22,4 +22,16 @@ class Campaign extends Model
         'goal' => 'decimal:2',
         'current' => 'decimal:2',
     ];
+    public function getProgressPercentageAttribute()
+    {
+        return ($this->current / $this->goal) * 100;
+    }
+
+    public function scopeNeedingSupport($query)
+    {
+        return $query->orderBy(
+            \DB::raw('(current / goal)'),
+            'asc'
+        );
+    }
 }

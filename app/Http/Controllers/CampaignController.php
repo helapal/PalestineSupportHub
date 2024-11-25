@@ -11,8 +11,13 @@ class CampaignController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Campaign::query();
+        // Get campaigns needing support (lowest progress ratio)
+        $needingSupportCampaigns = Campaign::needingSupport()
+            ->take(3)
+            ->get();
 
+        $query = Campaign::query();
+        
         // Apply sorting
         $sortField = $request->input('sort', 'created_at');
         $sortOrder = $request->input('order', 'desc');
@@ -21,12 +26,36 @@ class CampaignController extends Controller
             $query->orderBy($sortField, $sortOrder === 'asc' ? 'asc' : 'desc');
         }
 
+        // Exclude campaigns that are already in the needing support section
+        $query->whereNotIn('id', $needingSupportCampaigns->pluck('id'));
+
         // Apply filtering
         if ($search = $request->input('search')) {
-            $query->where('title', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
+        // Date range filtering
+        if ($startDate = $request->input('start_date')) {
+            $query->whereDate('created_at', '>=', $startDate);
+        }
+
+        if ($endDate = $request->input('end_date')) {
+            $query->whereDate('created_at', '<=', $endDate);
+        }
+
+        // Goal amount range filtering
+        if ($minGoal = $request->input('min_goal')) {
+            $query->where('goal', '>=', $minGoal);
+        }
+
+        if ($maxGoal = $request->input('max_goal')) {
+            $query->where('goal', '<=', $maxGoal);
+        }
+
+        // Current amount range filtering
         if ($minAmount = $request->input('min_amount')) {
             $query->where('current', '>=', $minAmount);
         }
@@ -35,10 +64,19 @@ class CampaignController extends Controller
             $query->where('current', '<=', $maxAmount);
         }
 
+        // Progress percentage filtering
+        if ($minProgress = $request->input('min_progress')) {
+            $query->whereRaw('(current / goal * 100) >= ?', [$minProgress]);
+        }
+
+        if ($maxProgress = $request->input('max_progress')) {
+            $query->whereRaw('(current / goal * 100) <= ?', [$maxProgress]);
+        }
+
         // Apply pagination
         $campaigns = $query->paginate(6)->withQueryString();
         
-        return view('campaigns.index', compact('campaigns'));
+        return view('campaigns.index', compact('campaigns', 'needingSupportCampaigns'));
     }
 
     public function donate(Request $request)
