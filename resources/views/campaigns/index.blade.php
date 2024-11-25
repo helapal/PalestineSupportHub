@@ -25,6 +25,46 @@
     <main class="container mx-auto px-4 py-8" id="campaigns">
         <h2 class="text-3xl font-bold mb-8 text-olive-800">Active Campaigns</h2>
         
+        <div class="mb-6">
+            <form action="{{ url()->current() }}" method="GET" class="flex flex-wrap gap-4">
+                <input 
+                    type="text" 
+                    name="search" 
+                    placeholder="Search campaigns..."
+                    value="{{ request('search') }}"
+                    class="px-4 py-2 border rounded-lg flex-1"
+                >
+                <div class="flex gap-4">
+                    <input 
+                        type="number" 
+                        name="min_amount" 
+                        placeholder="Min amount"
+                        value="{{ request('min_amount') }}"
+                        class="px-4 py-2 border rounded-lg w-32"
+                    >
+                    <input 
+                        type="number" 
+                        name="max_amount" 
+                        placeholder="Max amount"
+                        value="{{ request('max_amount') }}"
+                        class="px-4 py-2 border rounded-lg w-32"
+                    >
+                </div>
+                <select name="sort" class="px-4 py-2 border rounded-lg">
+                    <option value="created_at" {{ request('sort') === 'created_at' ? 'selected' : '' }}>Date</option>
+                    <option value="current" {{ request('sort') === 'current' ? 'selected' : '' }}>Amount Raised</option>
+                    <option value="goal" {{ request('sort') === 'goal' ? 'selected' : '' }}>Goal Amount</option>
+                </select>
+                <select name="order" class="px-4 py-2 border rounded-lg">
+                    <option value="desc" {{ request('order') === 'desc' ? 'selected' : '' }}>Descending</option>
+                    <option value="asc" {{ request('order') === 'asc' ? 'selected' : '' }}>Ascending</option>
+                </select>
+                <button type="submit" class="px-6 py-2 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-lg">
+                    Filter
+                </button>
+            </form>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($campaigns as $campaign)
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -79,6 +119,10 @@
                 </div>
             </div>
             @endforeach
+        </div>
+
+        <div class="mt-8">
+            {{ $campaigns->links() }}
         </div>
     </main>
 </div>
