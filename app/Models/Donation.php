@@ -31,12 +31,62 @@ class Donation extends Model
 
     public function logHistory($status, $paymentProvider = null, $paymentDetails = null, $errorMessage = null)
     {
-        return $this->histories()->create([
+        $history = $this->histories()->create([
             'status' => $status,
             'payment_provider' => $paymentProvider,
             'payment_details' => $paymentDetails,
             'error_message' => $errorMessage
         ]);
+
+        // Update donation status based on history
+        if ($status === 'completed') {
+            $this->last_payment_date = now();
+            $this->save();
+        } elseif ($status === 'failed' && $this->isRecurring()) {
+            // Handle recurring donation failure
+            $consecutiveFailures = $this->histories()
+                ->where('status', 'failed')
+                ->where('created_at', '>', now()->subDays(7))
+                ->count();
+            
+            // Deactivate recurring donations after 3 consecutive failures
+            if ($consecutiveFailures >= 3) {
+                $this->is_active = false;
+                $this->save();
+                
+                // Log deactivation
+                $this->logHistory(
+                    'deactivated',
+                    null,
+                    json_encode(['reason' => 'Too many consecutive payment failures']),
+                    'Recurring donation deactivated due to multiple payment failures'
+                );
+            }
+        }
+
+        return $history;
+    }
+
+    public function getPaymentHistory()
+    {
+        return $this->histories()
+                   ->orderBy('created_at', 'desc')
+                   ->get();
+    }
+
+    public function getLastSuccessfulPayment()
+    {
+        return $this->histories()
+                   ->where('status', 'completed')
+                   ->latest()
+                   ->first();
+    }
+
+    public function getTotalSuccessfulPayments()
+    {
+        return $this->histories()
+                   ->where('status', 'completed')
+                   ->count();
     }
 
     public function scheduleNextPayment()
