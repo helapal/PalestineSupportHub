@@ -60,6 +60,7 @@
                         </div>
                     </div>
                     <div class="p-4 pt-0">
+                        @include('campaigns.partials.social-share', ['campaign' => $campaign])
                         @include('campaigns.partials.donation-form', ['campaign' => $campaign])
                     </div>
                 </div>
@@ -229,7 +230,8 @@
                     </div>
                 </div>
                 <div class="p-4 pt-0">
-                    <form action="{{ route('campaigns.donate') }}" method="POST" class="flex gap-4">
+                    @include('campaigns.partials.social-share', ['campaign' => $campaign])
+                        <form action="{{ route('campaigns.donate') }}" method="POST" class="flex gap-4 mt-4">
                         @csrf
                         <input type="hidden" name="campaign_ids" value="{{ $campaign->id }}">
                         <input 
