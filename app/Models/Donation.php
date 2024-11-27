@@ -24,6 +24,21 @@ class Donation extends Model
         'last_payment_date' => 'datetime',
     ];
 
+    public function histories()
+    {
+        return $this->hasMany(DonationHistory::class);
+    }
+
+    public function logHistory($status, $paymentProvider = null, $paymentDetails = null, $errorMessage = null)
+    {
+        return $this->histories()->create([
+            'status' => $status,
+            'payment_provider' => $paymentProvider,
+            'payment_details' => $paymentDetails,
+            'error_message' => $errorMessage
+        ]);
+    }
+
     public function scheduleNextPayment()
     {
         if ($this->recurring_frequency === 'weekly' && $this->is_active) {
@@ -37,6 +52,8 @@ class Donation extends Model
         $this->is_active = false;
         $this->next_payment_date = null;
         $this->save();
+        
+        $this->logHistory('cancelled', null, 'Recurring donation cancelled by user');
     }
 
     public function isRecurring()

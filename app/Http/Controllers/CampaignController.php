@@ -89,26 +89,45 @@ class CampaignController extends Controller
         ]);
 
         try {
-            // In a real implementation, we would process the payment here
-            Log::info("Processing payment of {$validated['amount']} for campaigns: {$validated['campaign_ids']}");
-            
             $donation = new Donation($validated);
-            
-            // Set up recurring payment schedule if weekly is selected
-            if ($validated['recurring_frequency'] === 'weekly') {
-                $donation->scheduleNextPayment();
-            }
-            
             $donation->save();
             
-            // In a real implementation, we would send an email here
-            Log::info("Sending confirmation email to {$validated['email']} for donation {$donation->id}");
-            
-            $message = $donation->isRecurring()
-                ? 'Thank you for your recurring donation! Your first payment has been processed.'
-                : 'Thank you for your donation!';
-            
-            return redirect()->route('campaigns.index')->with('success', $message);
+            // Log initial donation status
+            $donation->logHistory('pending', null, 'Processing initial donation');
+
+            try {
+                // In a real implementation, we would process the payment here
+                Log::info("Processing payment of {$validated['amount']} for campaigns: {$validated['campaign_ids']}");
+                
+                // Set up recurring payment schedule if weekly is selected
+                if ($validated['recurring_frequency'] === 'weekly') {
+                    $donation->scheduleNextPayment();
+                }
+                
+                // Log successful payment
+                $donation->logHistory(
+                    'completed',
+                    'mock_payment_provider', // Replace with actual payment provider in production
+                    json_encode([
+                        'amount' => $validated['amount'],
+                        'campaign_ids' => $validated['campaign_ids'],
+                        'timestamp' => now()
+                    ])
+                );
+                
+                // In a real implementation, we would send an email here
+                Log::info("Sending confirmation email to {$validated['email']} for donation {$donation->id}");
+                
+                $message = $donation->isRecurring()
+                    ? 'Thank you for your recurring donation! Your first payment has been processed.'
+                    : 'Thank you for your donation!';
+                
+                return redirect()->route('campaigns.index')->with('success', $message);
+            } catch (\Exception $e) {
+                // Log payment failure
+                $donation->logHistory('failed', null, null, $e->getMessage());
+                throw $e;
+            }
         } catch (\Exception $e) {
             Log::error('Donation processing failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to process donation. Please try again.');
