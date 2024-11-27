@@ -64,13 +64,37 @@ class CampaignController extends Controller
             $query->where('current', '<=', $maxAmount);
         }
 
-        // Progress percentage filtering
+        // Progress percentage filtering - PostgreSQL specific
         if ($minProgress = $request->input('min_progress')) {
-            $query->whereRaw('(current / goal * 100) >= ?', [$minProgress]);
+            $query->whereRaw('(CAST(current AS DECIMAL) / CAST(goal AS DECIMAL) * 100) >= ?', [$minProgress]);
         }
 
         if ($maxProgress = $request->input('max_progress')) {
-            $query->whereRaw('(current / goal * 100) <= ?', [$maxProgress]);
+            $query->whereRaw('(CAST(current AS DECIMAL) / CAST(goal AS DECIMAL) * 100) <= ?', [$maxProgress]);
+        }
+
+        // Additional filters for campaign status
+        if ($request->filled('status')) {
+            $status = $request->input('status');
+            switch ($status) {
+                case 'urgent':
+                    $query->whereRaw('(CAST(current AS DECIMAL) / CAST(goal AS DECIMAL)) < 0.25');
+                    break;
+                case 'almost_funded':
+                    $query->whereRaw('(CAST(current AS DECIMAL) / CAST(goal AS DECIMAL)) >= 0.75');
+                    break;
+                case 'newly_added':
+                    $query->where('created_at', '>=', now()->subDays(7));
+                    break;
+            }
+        }
+
+        // Sort by progress
+        if ($sortField === 'progress') {
+            $query->orderByRaw(
+                '(CAST(current AS DECIMAL) / CAST(goal AS DECIMAL)) ' . 
+                ($sortOrder === 'asc' ? 'ASC' : 'DESC')
+            );
         }
 
         // Apply pagination

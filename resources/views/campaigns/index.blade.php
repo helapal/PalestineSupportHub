@@ -177,10 +177,17 @@
 
                 <!-- Sort Controls -->
                 <div class="flex flex-wrap items-center gap-4">
+                    <select name="status" class="px-4 py-2 border rounded-lg mr-4">
+                        <option value="">All Status</option>
+                        <option value="urgent" {{ request('status') === 'urgent' ? 'selected' : '' }}>Urgent (< 25% funded)</option>
+                        <option value="almost_funded" {{ request('status') === 'almost_funded' ? 'selected' : '' }}>Almost Funded (≥ 75%)</option>
+                        <option value="newly_added" {{ request('status') === 'newly_added' ? 'selected' : '' }}>Newly Added (Last 7 days)</option>
+                    </select>
                     <select name="sort" class="px-4 py-2 border rounded-lg">
                         <option value="created_at" {{ request('sort') === 'created_at' ? 'selected' : '' }}>Date</option>
                         <option value="current" {{ request('sort') === 'current' ? 'selected' : '' }}>Amount Raised</option>
                         <option value="goal" {{ request('sort') === 'goal' ? 'selected' : '' }}>Goal Amount</option>
+                        <option value="progress" {{ request('sort') === 'progress' ? 'selected' : '' }}>Progress</option>
                     </select>
                     <select name="order" class="px-4 py-2 border rounded-lg">
                         <option value="desc" {{ request('order') === 'desc' ? 'selected' : '' }}>Descending</option>
